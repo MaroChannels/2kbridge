@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { stmts } = require('../database');
-const { SOCKET_EVENTS, ROOM_STATUS, MAX_ROOM_PLAYERS } = require('../../../shared/constants');
+const { SOCKET_EVENTS, ROOM_STATUS, MAX_ROOM_PLAYERS } = require('../../shared/constants');
 
 // In-memory room state: roomCode → { dbId, members: Map<socketId, {id, username}> }
 const activeRooms = new Map();

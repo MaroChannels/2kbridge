@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { SOCKET_EVENTS } = require('../../../shared/constants');
+const { SOCKET_EVENTS } = require('../../shared/constants');
 const { registerLobbyHandlers } = require('./lobby');
 const { registerChatHandlers } = require('./chat');
 const { registerSignalingHandlers } = require('./signaling');

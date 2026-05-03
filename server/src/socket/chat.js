@@ -1,4 +1,4 @@
-const { SOCKET_EVENTS } = require('../../../shared/constants');
+const { SOCKET_EVENTS } = require('../../shared/constants');
 
 function registerChatHandlers(io, socket) {
   socket.on(SOCKET_EVENTS.CHAT_SEND, ({ text } = {}) => {

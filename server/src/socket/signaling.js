@@ -10,7 +10,7 @@
  *  4. Both sides relay ICE candidates to each other via RTC_ICE
  */
 
-const { SOCKET_EVENTS } = require('../../../shared/constants');
+const { SOCKET_EVENTS } = require('../../shared/constants');
 const { activeRooms } = require('./lobby');
 
 // socketId → { user, currentRoom } (we use socket.data directly)
