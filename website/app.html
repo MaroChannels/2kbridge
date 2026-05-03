@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src * 'unsafe-inline' 'unsafe-eval' blob: data: mediastream:;
+  ">
+  <title>2KBridge — Web App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="app-styles.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════════════════════ LOGIN PAGE -->
+  <div class="page active" id="page-login">
+    <div class="login-box">
+      <div class="login-logo">
+        <h1>2KBRIDGE</h1>
+        <p>Remote Play pour NBA 2K14</p>
+      </div>
+      <div class="tab-switcher">
+        <button class="active" id="tab-login-btn"    onclick="App.showTab('login')">Connexion</button>
+        <button              id="tab-register-btn" onclick="App.showTab('register')">Créer un compte</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="form-login">
+        <div class="form-group">
+          <label>Pseudo</label>
+          <input type="text" id="login-username" placeholder="votre pseudo" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-error" id="login-error"></div>
+        <button class="btn btn-primary btn-full" id="login-btn" onclick="App.login()">Se connecter</button>
+      </div>
+
+      <!-- Register form -->
+      <div id="form-register" style="display:none">
+        <div class="form-group">
+          <label>Pseudo</label>
+          <input type="text" id="reg-username" placeholder="3-20 caractères" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-password" placeholder="minimum 6 caractères" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-confirm" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <div class="form-error" id="register-error"></div>
+        <button class="btn btn-primary btn-full" id="register-btn" onclick="App.register()">Créer le compte</button>
+      </div>
+
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--text-3);white-space:nowrap;font-weight:600;letter-spacing:0.06em;text-transform:uppercase">Serveur</span>
+        <input type="text" id="server-url-input" style="
+          flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+          color:var(--text-2);font-size:12px;outline:none;padding:6px 10px;
+          font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+        " placeholder="https://mon-serveur.railway.app">
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ LOBBY PAGE -->
+  <div class="page" id="page-lobby">
+    <div class="lobby-header">
+      <span class="brand">2KBRIDGE</span>
+      <div class="user-info">
+        <span class="user-badge"><span class="online-dot"></span><span id="lobby-username">-</span></span>
+        <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="Mods.open()">Mods</button>
+        <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="App.settings()">Config</button>
+        <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="App.logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="lobby-body">
+      <div class="lobby-main">
+        <div class="lobby-actions">
+          <button class="btn btn-primary" onclick="App.showCreateModal()">+ Créer une room</button>
+          <input type="text" class="join-code-input" id="join-code-input" placeholder="CODE" maxlength="8">
+          <button class="btn btn-secondary" onclick="App.joinByCode()">Rejoindre</button>
+          <button class="btn btn-secondary" onclick="App.refreshRooms()" title="Actualiser">↻</button>
+        </div>
+        <div class="rooms-section">
+          <div class="section-title">Rooms disponibles</div>
+          <div class="rooms-list" id="rooms-list">
+            <div class="empty-state">Aucune room ouverte pour l'instant.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lobby-sidebar">
+        <div class="sidebar-section">
+          <div class="section-title" style="margin-bottom:10px">Inviter un ami</div>
+          <input type="text" class="invite-input" id="invite-username" placeholder="Pseudo de l'ami">
+          <input type="text" class="invite-input" id="invite-room-code" placeholder="Code de votre room">
+          <button class="btn btn-secondary btn-full" onclick="App.sendInvite()" style="font-size:12px">Envoyer l'invitation</button>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-title" style="margin-bottom:10px">Invitations reçues</div>
+          <div id="invite-list" style="font-size:12px;color:var(--text-muted)">Aucune invitation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ ROOM PAGE -->
+  <div class="page" id="page-room">
+    <div class="room-header">
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="App.leaveRoom()">← Quitter</button>
+      <span id="room-name-display" style="font-weight:700;font-size:15px"></span>
+      <span class="room-code-display" id="room-code-display"></span>
+      <span id="room-role-badge" class="badge badge-waiting" style="margin-left:auto"></span>
+    </div>
+
+    <div class="room-body">
+      <!-- Players -->
+      <div class="players-panel">
+        <div class="section-title" style="margin-bottom:10px">Joueurs</div>
+        <div id="players-list"></div>
+      </div>
+
+      <!-- Chat -->
+      <div class="chat-panel">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Envoyer un message..." maxlength="300"
+                 onkeydown="if(event.key==='Enter') App.sendChat()">
+          <button class="btn btn-primary" onclick="App.sendChat()">Envoyer</button>
+        </div>
+      </div>
+
+      <!-- Game controls -->
+      <div class="game-panel">
+        <div class="panel-title">Contrôles</div>
+
+        <div id="host-controls" style="display:none;flex-direction:column;gap:10px">
+          <div class="status-indicator">
+            <div class="status-dot green"></div>
+            <span>Vous êtes le host</span>
+          </div>
+          <button class="btn btn-danger btn-full" id="delete-room-btn" onclick="App.deleteRoom()" style="margin-bottom:4px">
+            🗑 Supprimer la room
+          </button>
+          <button class="btn btn-success btn-full" id="start-game-btn" onclick="App.startGame()">
+            ▶ Partager l'écran
+          </button>
+          <button class="btn btn-danger btn-full" id="stop-game-btn" onclick="App.stopGame()" style="display:none">
+            ■ Arrêter le stream
+          </button>
+          <div id="stream-status" class="status-indicator" style="display:none">
+            <div class="status-dot orange"></div>
+            <span id="stream-status-text">En attente...</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);line-height:1.6;padding:6px 0;border-top:1px solid var(--border)">
+            ℹ️ Pour que les inputs fonctionnent sur ta machine, lance aussi <b>2KBridge.exe</b> et connecte-toi à la même room.
+          </div>
+        </div>
+
+        <div id="client-controls" style="display:none;flex-direction:column;gap:10px">
+          <div class="status-indicator">
+            <div class="status-dot gray" id="stream-connect-dot"></div>
+            <span id="stream-connect-text">En attente du host...</span>
+          </div>
+          <button class="btn btn-primary btn-full" id="connect-stream-btn" onclick="App.requestStream()" disabled>
+            🎮 Connecter le stream
+          </button>
+          <div style="margin-top:5px;display:flex;align-items:center;gap:8px;font-size:11px" id="emu-toggle-row">
+            <input type="checkbox" id="gamepad-emu-checkbox" onchange="State.useGamepadEmulation = this.checked">
+            <label for="gamepad-emu-checkbox" style="cursor:pointer">Émulateur Manette (WASD / Espace)</label>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted)">
+            Quand le host lance le jeu, le bouton s'active.
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);margin:4px 0">
+        <div class="panel-title">Aide</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.7">
+          <div>• Partagez le code avec vos amis</div>
+          <div>• Le host partage son écran</div>
+          <div>• Les clients voient l'écran et envoient leurs inputs</div>
+          <div>• Echap = quitter le stream</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Stream overlay -->
+<div id="stream-container">
+  <video id="stream-video" autoplay playsinline></video>
+  <div id="stream-overlay">
+    <button class="btn btn-secondary" onclick="App.stopStream()" style="font-size:12px;padding:5px 10px">✕ Quitter stream</button>
+  </div>
+</div>
+
+<!-- Create room modal -->
+<div class="modal-backdrop" id="create-modal">
+  <div class="modal">
+    <h2>Créer une room</h2>
+    <div class="form-group">
+      <label>Nom de la room</label>
+      <input type="text" id="new-room-name" placeholder="ex: Basket avec les boys" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label>Nombre max de joueurs</label>
+      <select id="new-room-max" style="width:100%;padding:9px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text);font-size:13px;outline:none;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-appearance:none;appearance:none">
+        <option value="2">2 joueurs</option>
+        <option value="3">3 joueurs</option>
+        <option value="4">4 joueurs</option>
+      </select>
+    </div>
+    <div class="form-error" id="create-room-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.hideCreateModal()">Annuler</button>
+      <button class="btn btn-primary"   onclick="App.createRoom()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <h2>Paramètres</h2>
+    <div class="form-group">
+      <label>URL du serveur</label>
+      <input type="text" id="settings-server-url" placeholder="https://mon-serveur.railway.app">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.hideSettings()">Annuler</button>
+      <button class="btn btn-primary"   onclick="App.saveSettings()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODS overlay -->
+<div id="mods-overlay" class="mods-overlay">
+  <div class="mods-panel">
+    <div class="mods-header">
+      <div>
+        <div class="mods-title">Mod Manager</div>
+        <div class="mods-subtitle" id="mods-subtitle">Parcours les mods disponibles.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="mods-filter-btn active" data-cat="Tous" onclick="Mods.filterCat(this)">Tous</button>
+        <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="Mods.refresh()">↻</button>
+        <button class="mods-close-btn" onclick="Mods.close()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="mods-filters" id="mods-filters"></div>
+    <div class="mods-grid" id="mods-grid">
+      <div class="mods-loading">
+        <div class="mods-spinner"></div>
+        <span>Chargement des mods...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Socket.io client from CDN -->
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<!-- App -->
+<script src="app.js"></script>
+<script>
+  function initIcons() { if (window.lucide) window.lucide.createIcons(); }
+  document.addEventListener('DOMContentLoaded', initIcons);
+</script>
+</body>
+</html>

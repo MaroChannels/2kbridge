@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark" class="is-loading">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="2KBridge – Remote play gratuit pour NBA 2K14. Stream P2P, lobby en temps réel, inputs manette.">
+  <title>2KBridge — Remote Play pour NBA 2K14</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Intro overlay -->
+<div id="intro" aria-hidden="true">
+  <img src="assets/logo with texte.png" alt="" class="intro-logo">
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAVBAR
+     ═══════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+
+    <a href="#" class="nav-logo">
+      <img class="nav-logo-img" src="assets/logo with texte.png" alt="2KBridge">
+    </a>
+
+    <div class="nav-links">
+      <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
+      <a href="#how"      class="nav-link" data-i18n="nav.how">Comment ça marche</a>
+      <a href="#tech"     class="nav-link" data-i18n="nav.tech">Stack</a>
+      <a href="#download" class="nav-link" data-i18n="nav.download">Télécharger</a>
+    </div>
+
+    <div class="nav-controls">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">
+        <svg class="icon-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4"/>
+          <line x1="12" y1="2"  x2="12" y2="4"/>
+          <line x1="12" y1="20" x2="12" y2="22"/>
+          <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="2"  y1="12" x2="4"  y2="12"/>
+          <line x1="20" y1="12" x2="22" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <a href="#download" class="btn btn-primary nav-cta" data-i18n="nav.cta">Télécharger</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════ -->
+<section class="hero" id="home">
+  <canvas id="hero-particles" aria-hidden="true"></canvas>
+  <img class="hero-logo-deco" src="assets/logo with texte.png" alt="" aria-hidden="true">
+
+  <div class="container">
+    <div class="hero-content">
+
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n="hero.eyebrow">Open Source · WebRTC · Windows 11</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span data-i18n="hero.title.line1">Joue à NBA 2K14</span><br>
+        <span class="line-accent" data-i18n="hero.title.line2">avec tes potes,</span><br>
+        <span data-i18n="hero.title.line3">n'importe où.</span>
+      </h1>
+
+      <p class="hero-sub" data-i18n="hero.sub">
+        Stream P2P via WebRTC, lobby en temps réel, inputs clavier et manette — gratuitement, sans abonnement, sans serveur cloud.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#download" class="btn btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span data-i18n="hero.cta.primary">Télécharger gratuitement</span>
+        </a>
+        <a href="#how" class="btn btn-outline">
+          <span data-i18n="hero.cta.secondary">Voir comment ça marche</span>
+        </a>
+      </div>
+
+      <p class="hero-note" data-i18n="hero.note">Windows 11 · Aucune inscription serveur requise</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     FEATURES
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="features">
+  <div class="container">
+
+    <div class="section-header" data-animate>
+      <span class="section-eyebrow" data-i18n="features.label">Fonctionnalités</span>
+      <h2 class="section-title" data-i18n="features.title">Tout ce qu'il faut pour jouer ensemble.</h2>
+      <p class="section-sub" data-i18n="features.sub">Conçu pour être simple à lancer, difficile à lâcher.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.stream.title">Stream P2P</div>
+        <p class="feature-desc" data-i18n="feat.stream.desc">WebRTC direct entre les joueurs. Aucun serveur relai, latence minimale, qualité préservée.</p>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.lobby.title">Rooms & Lobby</div>
+        <p class="feature-desc" data-i18n="feat.lobby.desc">Crée ou rejoins une room avec un code à 8 chiffres. Jusqu'à 4 joueurs simultanément.</p>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="17" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M5 8h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.inputs.title">Inputs en temps réel</div>
+        <p class="feature-desc" data-i18n="feat.inputs.desc">Clavier, souris et manette Xbox via ViGEm. Les commandes du client arrivent sur le host en millisecondes.</p>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.chat.title">Chat intégré</div>
+        <p class="feature-desc" data-i18n="feat.chat.desc">Discute avec tes amis directement dans l'app. Messages en temps réel via Socket.io.</p>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.perms.title">Contrôle des permissions</div>
+        <p class="feature-desc" data-i18n="feat.perms.desc">Le host active ou désactive clavier, souris et manette pour chaque joueur individuellement.</p>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="feature-name" data-i18n="feat.invite.title">Invitations directes</div>
+        <p class="feature-desc" data-i18n="feat.invite.desc">Invite un ami par son pseudo sans quitter l'app. Il reçoit l'invitation en temps réel dans son lobby.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="how">
+  <div class="container">
+
+    <div class="section-header" style="text-align:center" data-animate>
+      <span class="section-eyebrow" data-i18n="how.label">Comment ça marche</span>
+      <h2 class="section-title" data-i18n="how.title">En 4 étapes, tu joues.</h2>
+    </div>
+
+    <div class="steps-row">
+
+      <div class="step" data-animate>
+        <div class="step-number">1</div>
+        <div class="step-title" data-i18n="step1.title">Télécharge 2KBridge</div>
+        <p class="step-desc" data-i18n="step1.desc">Lance l'installeur Windows. Aucun compte serveur requis.</p>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step" data-animate style="transition-delay:.1s">
+        <div class="step-number">2</div>
+        <div class="step-title" data-i18n="step2.title">Crée une room</div>
+        <p class="step-desc" data-i18n="step2.desc">Partage le code à 8 chiffres avec tes amis.</p>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step" data-animate style="transition-delay:.2s">
+        <div class="step-number">3</div>
+        <div class="step-title" data-i18n="step3.title">Lance NBA 2K14</div>
+        <p class="step-desc" data-i18n="step3.desc">Le stream démarre automatiquement dès le lancement.</p>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step" data-animate style="transition-delay:.3s">
+        <div class="step-number">4</div>
+        <div class="step-title" data-i18n="step4.title">Joue avec tes amis</div>
+        <p class="step-desc" data-i18n="step4.desc">Tes amis voient l'écran et envoient leurs inputs. C'est parti.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TECH STACK
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="tech">
+  <div class="container">
+
+    <div class="tech-card" data-animate="scale">
+      <span class="section-eyebrow" data-i18n="tech.label">Stack technique</span>
+      <h2 class="section-title" style="margin-top:10px" data-i18n="tech.title">Construit avec les bons outils.</h2>
+      <p class="section-sub" style="margin:0 auto;text-align:center" data-i18n="tech.sub">Technologies open source, testées en production.</p>
+
+      <div class="tech-pills">
+        <div class="tech-pill webrtc">
+          <span class="pill-dot"></span>
+          <span>WebRTC</span>
+          <span class="pill-desc" data-i18n="tech.webrtc">— Stream P2P</span>
+        </div>
+        <div class="tech-pill electron">
+          <span class="pill-dot"></span>
+          <span>Electron</span>
+          <span class="pill-desc" data-i18n="tech.electron">— App Windows native</span>
+        </div>
+        <div class="tech-pill node">
+          <span class="pill-dot"></span>
+          <span>Node.js</span>
+          <span class="pill-desc" data-i18n="tech.node">— Serveur lobby & signaling</span>
+        </div>
+        <div class="tech-pill socket">
+          <span class="pill-dot"></span>
+          <span>Socket.io</span>
+          <span class="pill-desc" data-i18n="tech.socket">— Temps réel · Chat · Rooms</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<div class="divider container"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     DOWNLOAD CTA
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="download">
+  <div class="container">
+
+    <div class="download-card" data-animate="scale">
+      <h2 class="download-title" data-i18n="dl.title">Prêt à jouer ?</h2>
+      <p class="download-sub" data-i18n="dl.sub">Télécharge 2KBridge gratuitement et rejoins tes amis en quelques secondes.</p>
+
+      <div>
+        <a href="#" class="btn btn-primary download-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span data-i18n="dl.btn">Télécharger 2KBridge</span>
+        </a>
+      </div>
+
+      <div class="download-perks">
+        <div class="perk">
+          <div class="perk-check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span data-i18n="dl.perk1">Gratuit, pour toujours</span>
+        </div>
+        <div class="perk">
+          <div class="perk-check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span data-i18n="dl.perk2">Open source, sans pub</span>
+        </div>
+        <div class="perk">
+          <div class="perk-check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span data-i18n="dl.perk3">Aucun abonnement</span>
+        </div>
+      </div>
+
+      <p class="download-note" data-i18n="dl.note">Windows 11 · Electron · Aucun compte requis côté serveur</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+
+      <div class="footer-brand">
+        <img src="assets/logo with texte.png" alt="2KBridge" class="footer-logo-img">
+        <p class="footer-tagline" data-i18n="footer.tagline">Remote play gratuit pour NBA 2K14. Joue avec tes amis, peu importe où vous êtes.</p>
+      </div>
+
+      <div>
+        <div class="footer-col-title" data-i18n="footer.nav">Navigation</div>
+        <div class="footer-links">
+          <a href="#features" class="footer-link" data-i18n="nav.features">Fonctionnalités</a>
+          <a href="#how"      class="footer-link" data-i18n="nav.how">Comment ça marche</a>
+          <a href="#tech"     class="footer-link" data-i18n="nav.tech">Stack</a>
+          <a href="#download" class="footer-link" data-i18n="nav.download">Télécharger</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-col-title" data-i18n="footer.project">Projet</div>
+        <a href="https://github.com" class="footer-github">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          GitHub
+        </a>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copyright" data-i18n="footer.copy">© 2024 2KBridge. Tous droits réservés.</span>
+      <span class="footer-made">Made with
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--accent)" stroke="none" style="display:inline;vertical-align:middle;margin:0 2px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        for NBA 2K14
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

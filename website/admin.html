@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2KBridge — Admin Panel</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #09090f; --bg2: #0e0e1a; --bg3: #141424;
+      --accent: #f97316; --text: #eeedf5; --text-2: #888899; --text-3: #4a4a62;
+      --border: rgba(255,255,255,0.07); --border-a: rgba(249,115,22,0.20);
+      --green: #4ade80; --red: #f87171; --r: 14px; --r-pill: 100px;
+    }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .header-brand { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+    .header-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(249,115,22,0.10); border: 1px solid var(--border-a); color: var(--accent); }
+
+    .layout { max-width: 1000px; margin: 0 auto; padding: 32px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 22px; padding: 26px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+    .card-title { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .card-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.6; }
+
+    /* Connection bar */
+    .conn-bar { display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .conn-bar input { flex: 1; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 12px; outline: none; transition: border-color .2s; }
+    .conn-bar input:focus { border-color: var(--border-a); }
+    .conn-status { font-size: 11.5px; margin-top: 6px; min-height: 16px; }
+    .conn-status.ok  { color: var(--green); }
+    .conn-status.err { color: var(--red); }
+
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 10.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    input[type=text], input[type=url], input[type=password], textarea, select {
+      width: 100%; padding: 9px 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color .2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--border-a); }
+    textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+    select { cursor: pointer; -webkit-appearance: none; appearance: none; }
+    .hint { font-size: 11px; color: var(--text-3); margin-top: 5px; line-height: 1.6; }
+    .hint code { color: var(--accent); font-size: 11px; background: rgba(249,115,22,0.08); padding: 1px 5px; border-radius: 4px; }
+
+    /* File drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--border-a); background: rgba(249,115,22,0.04); }
+    .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .drop-zone-icon { font-size: 28px; margin-bottom: 8px; }
+    .drop-zone-text { font-size: 13px; font-weight: 600; color: var(--text-2); }
+    .drop-zone-sub  { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+    .drop-zone.has-file { border-color: rgba(74,222,128,0.30); background: rgba(74,222,128,0.04); }
+    .drop-zone.has-file .drop-zone-text { color: var(--green); }
+
+    /* Image preview */
+    #preview-wrap { margin-bottom: 14px; display: none; }
+    #preview-wrap.visible { display: block; }
+    #preview-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); background: var(--bg3); display: block; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; padding: 11px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; font-family: inherit; border: none; cursor: pointer; transition: opacity .2s; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-sm { padding: 6px 14px; border-radius: var(--r-pill); background: var(--bg3); border: 1px solid var(--border); color: var(--text-2); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: border-color .2s, color .2s; white-space: nowrap; }
+    .btn-sm:hover { border-color: var(--border-a); color: var(--text); }
+    .btn-danger { padding: 6px 12px; border-radius: var(--r-pill); background: rgba(248,113,113,.10); border: 1px solid rgba(248,113,113,.18); color: var(--red); font-size: 11.5px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background .2s; white-space: nowrap; }
+    .btn-danger:hover { background: rgba(248,113,113,.20); }
+
+    /* Progress bar */
+    #upload-progress { display: none; margin-top: 12px; }
+    #upload-progress.visible { display: block; }
+    .progress-bar-track { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .15s ease; width: 0%; }
+    .progress-label { font-size: 11px; color: var(--text-3); margin-top: 6px; }
+
+    /* Status */
+    #status { margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; display: none; }
+    #status.ok  { background: rgba(74,222,128,.10); border: 1px solid rgba(74,222,128,.18); color: var(--green); }
+    #status.err { background: rgba(248,113,113,.10); border: 1px solid rgba(248,113,113,.18); color: var(--red); }
+
+    /* Mod list */
+    #mod-list { display: flex; flex-direction: column; gap: 8px; }
+    .mod-row { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; }
+    .mod-thumb { width: 44px; height: 28px; border-radius: 6px; object-fit: cover; background: var(--bg); flex-shrink: 0; }
+    .mod-thumb-ph { width: 44px; height: 28px; border-radius: 6px; background: var(--bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 16px; }
+    .mod-info { flex: 1; min-width: 0; }
+    .mod-name { font-weight: 700; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mod-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mod-cat { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); background: rgba(249,115,22,.10); color: var(--accent); flex-shrink: 0; }
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 12.5px; line-height: 1.7; }
+
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tabs */
+    .tab-bar { display: flex; gap: 4px; padding: 16px 32px 0; }
+    .tab-btn { padding: 8px 18px; border-radius: var(--r-pill); background: transparent; border: 1px solid var(--border); color: var(--text-2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .2s; }
+    .tab-btn:hover { border-color: var(--border-a); color: var(--text); }
+    .tab-btn.active { background: rgba(249,115,22,.12); border-color: var(--border-a); color: var(--accent); }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    /* Game list */
+    #game-list { display: flex; flex-direction: column; gap: 8px; }
+    .game-row { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; }
+    .game-cover { width: 36px; height: 50px; border-radius: 6px; object-fit: cover; background: var(--bg); flex-shrink: 0; }
+    .game-cover-ph { width: 36px; height: 50px; border-radius: 6px; background: var(--bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 18px; }
+    .game-info { flex: 1; min-width: 0; }
+    .game-name { font-weight: 700; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .game-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .game-ver  { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); background: rgba(249,115,22,.10); color: var(--accent); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-brand">2KBridge</span>
+  <span class="header-badge">Admin Panel</span>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('mods', this)">Mods</button>
+  <button class="tab-btn"        onclick="switchTab('games', this)">Jeux</button>
+</div>
+
+<!-- ═══════════════════════════ MODS TAB ═══════════════════════════ -->
+<div id="tab-mods" class="tab-section active">
+<div class="layout">
+
+  <!-- ── LEFT: Add a mod ── -->
+  <div class="card">
+    <div class="card-title">Ajouter un mod</div>
+    <div class="card-sub">Upload le fichier depuis ton PC. Il sera hébergé sur ton serveur et proposé à tous les joueurs.</div>
+
+    <!-- Connection -->
+    <div class="conn-bar">
+      <input type="text"     id="server-url"    placeholder="http://localhost:3000" value="http://localhost:3000">
+      <input type="password" id="admin-secret"  placeholder="Clé admin (.env)">
+      <button class="btn-sm" onclick="testConnection()">Tester</button>
+    </div>
+    <div class="conn-status" id="conn-status"></div>
+
+    <!-- Image preview -->
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="Aperçu image">
+    </div>
+
+    <div class="field">
+      <label>Nom du mod *</label>
+      <input type="text" id="f-name" placeholder="Jersey Lakers 2003">
+    </div>
+
+    <div class="field">
+      <label>Catégorie</label>
+      <select id="f-category">
+        <option>Maillots</option>
+        <option>Visages</option>
+        <option>Terrain</option>
+        <option>Chaussures</option>
+        <option>Rosters</option>
+        <option>Arènes</option>
+        <option>Autres</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea id="f-description" placeholder="Courte description..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Image d'aperçu (URL)</label>
+      <input type="url" id="f-image" placeholder="https://i.imgur.com/xxxxx.png" oninput="previewImage(this.value)">
+      <div class="hint">Lien direct vers une image JPG/PNG (Imgur, Discord CDN, etc.)</div>
+    </div>
+
+    <div class="field">
+      <label>Fichier du mod *</label>
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="f-file" onchange="onFileSelected(this)">
+        <div class="drop-zone-icon">📦</div>
+        <div class="drop-zone-text" id="dz-text">Clique ou glisse le fichier ici</div>
+        <div class="drop-zone-sub" id="dz-sub">Tous types de fichiers · Max 200 MB</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nom du fichier dans le jeu *</label>
+      <input type="text" id="f-gamefile" placeholder="jersey_home_lakers.iff">
+      <div class="hint">
+        Nom du fichier tel qu'il existe dans le dossier de NBA 2K14 (là où se trouve l'exe).<br>
+        Exemples : <code>jersey_home_0.iff</code> · <code>crowd.wav</code> · <code>roster.ros</code>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="publish-btn" onclick="publishMod()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Publier le mod
+    </button>
+
+    <div id="upload-progress">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">Upload en cours…</div>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <!-- ── RIGHT: Mod list ── -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="card-title">Mods publiés</div>
+      <button class="btn-sm" onclick="loadMods()">↻</button>
+    </div>
+    <div class="card-sub" id="list-sub">Connecte-toi au serveur pour voir la liste.</div>
+    <div id="mod-list"><div class="empty">Aucun mod pour l'instant.</div></div>
+  </div>
+
+</div>
+</div><!-- end #tab-mods -->
+
+<!-- ═══════════════════════════ GAMES TAB ═══════════════════════════ -->
+<div id="tab-games" class="tab-section">
+<div class="layout">
+
+  <!-- ── LEFT: Add a game ── -->
+  <div class="card">
+    <div class="card-title">Ajouter un jeu</div>
+    <div class="card-sub">Renseigne les informations et un lien de téléchargement direct. Les joueurs pourront installer le jeu directement depuis l'app.</div>
+
+    <div class="field">
+      <label>Nom du jeu *</label>
+      <input type="text" id="g-name" placeholder="NBA 2K14">
+    </div>
+
+    <div class="field">
+      <label>Version</label>
+      <input type="text" id="g-version" placeholder="v1.0.5">
+    </div>
+
+    <div class="field">
+      <label>Taille (affichage)</label>
+      <input type="text" id="g-size" placeholder="8.5 GB">
+      <div class="hint">Label affiché sur la carte. Ex : <code>8.5 GB</code></div>
+    </div>
+
+    <div class="field">
+      <label>Image de couverture (URL)</label>
+      <input type="url" id="g-cover" placeholder="https://i.imgur.com/xxxxx.jpg" oninput="previewGameImage(this.value)">
+      <div class="hint">Idéalement en format portrait (2:3). Lien direct JPG/PNG.</div>
+    </div>
+
+    <div id="g-preview-wrap" style="margin-bottom:14px;display:none">
+      <img id="g-preview-img" src="" alt="Aperçu" style="width:100%;max-width:160px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;border:1px solid var(--border);display:block;">
+    </div>
+
+    <div class="field">
+      <label>Lien de téléchargement direct *</label>
+      <input type="url" id="g-download" placeholder="https://example.com/nba2k14.zip">
+      <div class="hint">Lien direct vers le fichier ZIP ou EXE. Pas d'upload — le fichier reste sur ton hébergement.</div>
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea id="g-description" placeholder="Description courte du jeu…"></textarea>
+    </div>
+
+    <button class="btn-primary" id="g-publish-btn" onclick="publishGame()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Publier le jeu
+    </button>
+
+    <div id="g-status" style="margin-top:10px;padding:10px 14px;border-radius:10px;font-size:12.5px;display:none;"></div>
+  </div>
+
+  <!-- ── RIGHT: Game list ── -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="card-title">Jeux publiés</div>
+      <button class="btn-sm" onclick="loadGames()">↻</button>
+    </div>
+    <div class="card-sub" id="g-list-sub">Connecte-toi au serveur pour voir la liste.</div>
+    <div id="game-list"><div class="empty">Aucun jeu pour l'instant.</div></div>
+  </div>
+
+</div>
+</div><!-- end #tab-games -->
+
+<script>
+  // ── State ──────────────────────────────────────────────────
+  let selectedFile = null;
+
+  function server() { return (document.getElementById('server-url').value || '').replace(/\/$/, ''); }
+  function secret() { return document.getElementById('admin-secret').value; }
+
+  // ── File select ────────────────────────────────────────────
+  function onFileSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    selectedFile = file;
+    const dz = document.getElementById('drop-zone');
+    dz.classList.add('has-file');
+    document.getElementById('dz-text').textContent = file.name;
+    document.getElementById('dz-sub').textContent  = formatSize(file.size);
+
+    // Auto-fill game filename if empty
+    const gf = document.getElementById('f-gamefile');
+    if (!gf.value.trim()) gf.value = file.name;
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024)       return bytes + ' B';
+    if (bytes < 1024*1024)  return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(1) + ' MB';
+  }
+
+  // Drag & drop styling
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', ()  => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const input = document.getElementById('f-file');
+    // Assign to real input via DataTransfer
+    const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+    onFileSelected(input);
+  });
+
+  // ── Image preview ──────────────────────────────────────────
+  function previewImage(url) {
+    const wrap = document.getElementById('preview-wrap');
+    const img  = document.getElementById('preview-img');
+    if (!url) { wrap.classList.remove('visible'); return; }
+    img.src = url;
+    img.onload  = () => wrap.classList.add('visible');
+    img.onerror = () => wrap.classList.remove('visible');
+  }
+
+  // ── Status helpers ─────────────────────────────────────────
+  function showStatus(msg, type) {
+    const el = document.getElementById('status');
+    el.textContent = msg; el.className = type; el.style.display = 'block';
+    if (type === 'ok') setTimeout(() => el.style.display = 'none', 5000);
+  }
+  function setConnStatus(msg, type) {
+    const el = document.getElementById('conn-status');
+    el.textContent = msg; el.className = 'conn-status ' + type;
+  }
+
+  // ── Test connection ────────────────────────────────────────
+  async function testConnection() {
+    setConnStatus('Test en cours…', '');
+    try {
+      const res  = await fetch(`${server()}/health`);
+      const data = await res.json();
+      setConnStatus(`✓ Connecté — uptime ${Math.round(data.uptime)}s`, 'ok');
+      loadMods();
+    } catch (e) {
+      setConnStatus(`✗ ${e.message}`, 'err');
+    }
+  }
+
+  // ── Load mod list ──────────────────────────────────────────
+  async function loadMods() {
+    const listEl = document.getElementById('mod-list');
+    const subEl  = document.getElementById('list-sub');
+    listEl.innerHTML = '<div class="empty">Chargement…</div>';
+    try {
+      const res  = await fetch(`${server()}/api/mods`);
+      const data = await res.json();
+      const mods = data.mods || [];
+      subEl.textContent = `${mods.length} mod${mods.length !== 1 ? 's' : ''} publié${mods.length !== 1 ? 's' : ''}.`;
+      if (!mods.length) { listEl.innerHTML = '<div class="empty">Aucun mod.<br>Ajoute-en un !</div>'; return; }
+      listEl.innerHTML = mods.map(m => `
+        <div class="mod-row" id="row-${m.id}">
+          ${m.imageUrl
+            ? `<img class="mod-thumb" src="${m.imageUrl}" onerror="this.style.display='none'">`
+            : `<div class="mod-thumb-ph">📦</div>`}
+          <div class="mod-info">
+            <div class="mod-name">${m.name}</div>
+            <div class="mod-meta">${m.gameFilePath}</div>
+          </div>
+          <span class="mod-cat">${m.category || 'Autres'}</span>
+          <button class="btn-danger" onclick="deleteMod('${m.id}','${m.name.replace(/'/g,"\\'")}')">Sup.</button>
+        </div>`).join('');
+    } catch (e) {
+      subEl.textContent = 'Erreur.';
+      listEl.innerHTML = `<div class="empty">${e.message}</div>`;
+    }
+  }
+
+  // ── Publish mod ────────────────────────────────────────────
+  async function publishMod() {
+    const name         = document.getElementById('f-name').value.trim();
+    const category     = document.getElementById('f-category').value;
+    const description  = document.getElementById('f-description').value.trim();
+    const imageUrl     = document.getElementById('f-image').value.trim();
+    const gameFileName = document.getElementById('f-gamefile').value.trim();
+
+    if (!name)         { showStatus('Le nom est obligatoire.', 'err'); return; }
+    if (!gameFileName) { showStatus('Le nom du fichier dans le jeu est obligatoire.', 'err'); return; }
+    if (!selectedFile) { showStatus('Sélectionne le fichier du mod.', 'err'); return; }
+    if (!secret())     { showStatus('Entre la clé admin (ADMIN_SECRET dans .env).', 'err'); return; }
+
+    const btn = document.getElementById('publish-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Upload…';
+
+    const progress = document.getElementById('upload-progress');
+    const fill     = document.getElementById('progress-fill');
+    const label    = document.getElementById('progress-label');
+    progress.classList.add('visible');
+    fill.style.width = '0%';
+
+    const fd = new FormData();
+    fd.append('name',         name);
+    fd.append('category',     category);
+    fd.append('description',  description);
+    fd.append('imageUrl',     imageUrl);
+    fd.append('gameFileName', gameFileName);
+    fd.append('modFile',      selectedFile, selectedFile.name);
+
+    try {
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${server()}/api/mods`);
+        xhr.setRequestHeader('Authorization', `Bearer ${secret()}`);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round(e.loaded / e.total * 100);
+            fill.style.width = pct + '%';
+            label.textContent = `Upload… ${pct}% (${formatSize(e.loaded)} / ${formatSize(e.total)})`;
+          }
+        };
+
+        xhr.onload = () => {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+          else reject(new Error(data.error || `HTTP ${xhr.status}`));
+        };
+        xhr.onerror = () => reject(new Error('Erreur réseau'));
+        xhr.send(fd);
+      });
+
+      fill.style.width = '100%';
+      label.textContent = 'Upload terminé !';
+      showStatus(`✓ "${name}" publié avec succès !`, 'ok');
+
+      // Reset form
+      document.getElementById('f-name').value        = '';
+      document.getElementById('f-description').value = '';
+      document.getElementById('f-image').value       = '';
+      document.getElementById('f-gamefile').value    = '';
+      document.getElementById('f-file').value        = '';
+      selectedFile = null;
+      document.getElementById('drop-zone').classList.remove('has-file');
+      document.getElementById('dz-text').textContent = 'Clique ou glisse le fichier ici';
+      document.getElementById('dz-sub').textContent  = 'Tous types de fichiers · Max 200 MB';
+      document.getElementById('preview-wrap').classList.remove('visible');
+
+      setTimeout(() => progress.classList.remove('visible'), 2000);
+      loadMods();
+
+    } catch (e) {
+      showStatus(`Erreur : ${e.message}`, 'err');
+      progress.classList.remove('visible');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Publier le mod';
+    }
+  }
+
+  // ── Delete mod ─────────────────────────────────────────────
+  async function deleteMod(id, name) {
+    if (!confirm(`Supprimer "${name}" ? Le fichier sera effacé du serveur.`)) return;
+    if (!secret()) { alert('Entre la clé admin.'); return; }
+    try {
+      const res = await fetch(`${server()}/api/mods/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${secret()}` },
+      });
+      if (res.ok) {
+        document.getElementById(`row-${id}`)?.remove();
+        const remaining = document.querySelectorAll('[id^="row-"]').length;
+        document.getElementById('list-sub').textContent = `${remaining} mod${remaining !== 1 ? 's' : ''} publié${remaining !== 1 ? 's' : ''}.`;
+        if (!remaining) document.getElementById('mod-list').innerHTML = '<div class="empty">Aucun mod.</div>';
+      } else {
+        const d = await res.json();
+        alert(`Erreur : ${d.error}`);
+      }
+    } catch (e) { alert(`Erreur réseau : ${e.message}`); }
+  }
+
+  // ── Tab switching ──────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'games') loadGames();
+  }
+
+  // ── Game image preview ────────────────────────────────────
+  function previewGameImage(url) {
+    const wrap = document.getElementById('g-preview-wrap');
+    const img  = document.getElementById('g-preview-img');
+    if (!url) { wrap.style.display = 'none'; return; }
+    img.src = url;
+    img.onload  = () => { wrap.style.display = 'block'; };
+    img.onerror = () => { wrap.style.display = 'none'; };
+  }
+
+  function showGameStatus(msg, type) {
+    const el = document.getElementById('g-status');
+    el.textContent = msg;
+    el.className = '';
+    el.style.display = 'block';
+    if (type === 'ok')  { el.style.background = 'rgba(74,222,128,.10)'; el.style.border = '1px solid rgba(74,222,128,.18)'; el.style.color = 'var(--green)'; }
+    if (type === 'err') { el.style.background = 'rgba(248,113,113,.10)'; el.style.border = '1px solid rgba(248,113,113,.18)'; el.style.color = 'var(--red)'; }
+    if (type === 'ok') setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  // ── Load game list ─────────────────────────────────────────
+  async function loadGames() {
+    const listEl = document.getElementById('game-list');
+    const subEl  = document.getElementById('g-list-sub');
+    listEl.innerHTML = '<div class="empty">Chargement…</div>';
+    try {
+      const res   = await fetch(`${server()}/api/games`);
+      const data  = await res.json();
+      const games = data.games || [];
+      subEl.textContent = `${games.length} jeu${games.length !== 1 ? 'x' : ''} publié${games.length !== 1 ? 's' : ''}.`;
+      if (!games.length) { listEl.innerHTML = '<div class="empty">Aucun jeu.<br>Ajoute-en un !</div>'; return; }
+      listEl.innerHTML = games.map(g => `
+        <div class="game-row" id="grow-${g.id}">
+          ${g.coverUrl
+            ? `<img class="game-cover" src="${g.coverUrl}" onerror="this.style.display='none'">`
+            : `<div class="game-cover-ph">🎮</div>`}
+          <div class="game-info">
+            <div class="game-name">${g.name}</div>
+            <div class="game-meta">${g.sizeLabel || ''} ${g.downloadUrl ? '· ' + g.downloadUrl.substring(0, 40) + '…' : ''}</div>
+          </div>
+          ${g.version ? `<span class="game-ver">${g.version}</span>` : ''}
+          <button class="btn-danger" onclick="deleteGame('${g.id}','${g.name.replace(/'/g,"\\'")}')">Sup.</button>
+        </div>`).join('');
+    } catch (e) {
+      subEl.textContent = 'Erreur.';
+      listEl.innerHTML = `<div class="empty">${e.message}</div>`;
+    }
+  }
+
+  // ── Publish game ──────────────────────────────────────────
+  async function publishGame() {
+    const name        = document.getElementById('g-name').value.trim();
+    const version     = document.getElementById('g-version').value.trim();
+    const sizeLabel   = document.getElementById('g-size').value.trim();
+    const coverUrl    = document.getElementById('g-cover').value.trim();
+    const downloadUrl = document.getElementById('g-download').value.trim();
+    const description = document.getElementById('g-description').value.trim();
+
+    if (!name)        { showGameStatus('Le nom est obligatoire.', 'err'); return; }
+    if (!downloadUrl) { showGameStatus('Le lien de téléchargement est obligatoire.', 'err'); return; }
+    if (!secret())    { showGameStatus('Entre la clé admin (ADMIN_SECRET dans .env).', 'err'); return; }
+
+    const btn = document.getElementById('g-publish-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Publication…';
+
+    try {
+      const res  = await fetch(`${server()}/api/games`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${secret()}`,
+        },
+        body: JSON.stringify({ name, version, sizeLabel, coverUrl, downloadUrl, description }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+      showGameStatus(`✓ "${name}" publié avec succès !`, 'ok');
+
+      // Reset form
+      ['g-name','g-version','g-size','g-cover','g-download','g-description'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('g-preview-wrap').style.display = 'none';
+      loadGames();
+
+    } catch (e) {
+      showGameStatus(`Erreur : ${e.message}`, 'err');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Publier le jeu';
+    }
+  }
+
+  // ── Delete game ────────────────────────────────────────────
+  async function deleteGame(id, name) {
+    if (!confirm(`Supprimer "${name}" ?`)) return;
+    if (!secret()) { alert('Entre la clé admin.'); return; }
+    try {
+      const res = await fetch(`${server()}/api/games/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${secret()}` },
+      });
+      if (res.ok) {
+        document.getElementById(`grow-${id}`)?.remove();
+        const remaining = document.querySelectorAll('[id^="grow-"]').length;
+        document.getElementById('g-list-sub').textContent = `${remaining} jeu${remaining !== 1 ? 'x' : ''} publié${remaining !== 1 ? 's' : ''}.`;
+        if (!remaining) document.getElementById('game-list').innerHTML = '<div class="empty">Aucun jeu.</div>';
+      } else {
+        const d = await res.json();
+        alert(`Erreur : ${d.error}`);
+      }
+    } catch (e) { alert(`Erreur réseau : ${e.message}`); }
+  }
+
+  window.addEventListener('load', () => {
+    // Try to connect automatically
+    testConnection();
+  });
+</script>
+</body>
+</html>

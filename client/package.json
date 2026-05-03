@@ -1,0 +1,63 @@
+{
+  "name": "2kbridge-client",
+  "version": "1.0.0",
+  "description": "2KBridge – remote play client for NBA 2K14",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start2": "electron . --user-data-dir=%TEMP%\\2kbridge-player2",
+    "dev": "electron . --inspect",
+    "rebuild": "electron-rebuild -f -w robotjs,vigemclient",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.17",
+    "electron-store": "^8.2.0",
+    "socket.io-client": "^4.7.4"
+  },
+  "optionalDependencies": {
+    "robotjs": "^0.6.0",
+    "vigemclient": "^1.0.1"
+  },
+  "devDependencies": {
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3",
+    "electron-rebuild": "^3.2.9"
+  },
+  "build": {
+    "appId": "com.2kbridge.app",
+    "productName": "2KBridge",
+    "files": [
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "!node_modules/.cache/**",
+      "!node_modules/electron/**",
+      "!node_modules/electron-builder/**",
+      "!node_modules/electron-rebuild/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../shared",
+        "to": "shared"
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/robotjs/**",
+      "node_modules/vigemclient/**",
+      "node_modules/adm-zip/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "2KBridge.exe"
+    }
+  }
+}

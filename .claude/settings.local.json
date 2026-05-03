@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install:*)",
+      "Bash(timeout 5 node src/index.js)",
+      "Bash(node -e \"console.log\\(require\\(''crypto''\\).randomBytes\\(32\\).toString\\(''hex''\\)\\)\")",
+      "Bash(timeout 4 node src/index.js)",
+      "WebFetch(domain:getsolara.dev)",
+      "Bash(curl -s \"https://getsolara.dev/\")",
+      "Bash(curl -s https://getsolara.dev/)",
+      "Read(//tmp/**)",
+      "Bash(npm run *)",
+      "Bash(npx electron-builder *)",
+      "Bash(npx pkg *)"
+    ]
+  }
+}

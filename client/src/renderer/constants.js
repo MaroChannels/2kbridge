@@ -1,0 +1,40 @@
+// Client-side constants (ES module version of shared/constants.js)
+
+export const SOCKET_EVENTS = {
+  AUTH_LOGIN: 'auth:login',
+  AUTH_OK: 'auth:ok',
+  AUTH_ERROR: 'auth:error',
+  ROOM_CREATE: 'room:create',
+  ROOM_JOIN: 'room:join',
+  ROOM_LEAVE: 'room:leave',
+  ROOM_LIST: 'room:list',
+  ROOM_CREATED: 'room:created',
+  ROOM_JOINED: 'room:joined',
+  ROOM_UPDATED: 'room:updated',
+  ROOM_MEMBER_JOINED: 'room:member:joined',
+  ROOM_MEMBER_LEFT: 'room:member:left',
+  ROOM_CLOSED: 'room:closed',
+  ROOM_GAME_STARTED: 'room:game:started',
+  ROOM_GAME_START: 'room:game:start',
+  ROOM_GAME_STOP: 'room:game:stop',
+  ROOM_STREAM_STOPPED: 'room:stream:stopped',
+  ROOM_DELETE: 'room:delete',
+  CHAT_MESSAGE: 'chat:message',
+  CHAT_SEND: 'chat:send',
+  RTC_OFFER: 'rtc:offer',
+  RTC_ANSWER: 'rtc:answer',
+  RTC_ICE: 'rtc:ice',
+  RTC_REQUEST: 'rtc:request',
+  INPUT_FORWARD: 'input:forward',
+  PLAYER_PERMISSION_TOGGLE: 'room:player:permission',
+  FRIEND_INVITE: 'friend:invite',
+  FRIEND_INVITE_RECV: 'friend:invite:recv',
+  ERROR: 'error',
+  DISCONNECT: 'disconnect',
+};
+
+export const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
+];
