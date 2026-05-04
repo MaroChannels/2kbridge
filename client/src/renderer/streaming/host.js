@@ -16,32 +16,63 @@ export class HostStreamer {
     this._listenersRegistered = false;
   }
 
-  /** Select and start capturing the screen */
-  async startCapture(sourceId) {
-    this.sourceId = sourceId;
+  /**
+   * Start capturing the screen + game audio.
+   * @param {string} videoSourceId  – screen/window source for video
+   * @param {string|null} audioSourceId – window source of the game for audio (optional)
+   */
+  async startCapture(videoSourceId, audioSourceId = null) {
+    this.sourceId = videoSourceId;
 
-    // Get the media stream using the desktopCapturer source
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: {
-        mandatory: {
-          chromeMediaSource: 'desktop',
-          chromeMediaSourceId: sourceId,
-          maxFrameRate: 60,
-          maxWidth: 1280,
-          maxHeight: 720,
-          minFrameRate: 30,
-        },
+    const videoConstraints = {
+      mandatory: {
+        chromeMediaSource: 'desktop',
+        chromeMediaSourceId: videoSourceId,
+        maxFrameRate: 60,
+        maxWidth: 1280,
+        maxHeight: 720,
+        minFrameRate: 30,
       },
-    });
+    };
 
-    // Hint to WebRTC: prioritize low latency over quality
-    for (const track of this.stream.getVideoTracks()) {
-      track.contentHint = 'motion';
+    // Step 1 — Video stream (always from screen for fullscreen-game stability)
+    const videoStream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: videoConstraints,
+    });
+    const videoTracks = videoStream.getVideoTracks();
+    for (const t of videoTracks) t.contentHint = 'motion';
+
+    // Step 2 — Audio: try game-specific process loopback first
+    let audioTracks = [];
+
+    if (audioSourceId) {
+      try {
+        // Chromium on Windows 10 2004+ supports per-process loopback when the
+        // window source ID is passed alongside chromeMediaSource:'desktop'.
+        // We request video too (required by the API) then immediately discard it.
+        const gameStream = await navigator.mediaDevices.getUserMedia({
+          audio: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: audioSourceId } },
+          video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: audioSourceId } },
+        });
+        gameStream.getVideoTracks().forEach(t => t.stop()); // discard duplicate video
+        audioTracks = gameStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          console.log('[Host] Game audio captured (per-process loopback)');
+        }
+      } catch (e) {
+        console.warn('[Host] Per-process audio failed, will try system loopback:', e.message);
+      }
     }
 
+    if (audioTracks.length === 0) {
+      console.log('[Host] Aucun audio jeu disponible — stream vidéo uniquement');
+    }
+
+    // Step 3 — Combine into one MediaStream sent over WebRTC
+    this.stream = new MediaStream([...videoTracks, ...audioTracks]);
+
     this._registerSocketHandlers();
-    console.log('[Host] Screen capture started');
     return this.stream;
   }
 

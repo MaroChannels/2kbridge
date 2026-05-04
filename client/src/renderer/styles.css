@@ -512,16 +512,64 @@ body {
 }
 #stream-container.active { display: flex; align-items: center; justify-content: center; }
 #stream-video { width: 100%; height: 100%; object-fit: contain; }
+
 #stream-overlay {
   position: absolute;
-  top: 12px; right: 12px;
-  display: flex;
-  gap: 8px;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1001;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
 }
-#stream-container:hover #stream-overlay { opacity: 1; }
+#stream-container:hover #stream-overlay { opacity: 1; pointer-events: auto; }
+#stream-container:fullscreen #stream-overlay,
+#stream-container:-webkit-full-screen #stream-overlay { pointer-events: auto; }
+
+.stream-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(9,9,15,0.88);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 100px;
+  padding: 5px 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+.stream-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border-radius: 100px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.72);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.stream-ctrl-btn:hover {
+  background: rgba(255,255,255,0.09);
+  color: #fff;
+}
+.stream-ctrl-quit:hover {
+  background: rgba(248,113,113,0.14);
+  color: var(--red);
+}
+.stream-ctrl-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.10);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    MODALS

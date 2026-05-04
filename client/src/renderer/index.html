@@ -210,7 +210,22 @@
 <div id="stream-container">
   <video id="stream-video" autoplay playsinline></video>
   <div id="stream-overlay">
-    <button class="btn btn-secondary" onclick="App.stopStream()" style="font-size:12px;padding:5px 10px">✕ Quitter stream</button>
+    <div class="stream-controls">
+      <button id="btn-stream-fullscreen" class="stream-ctrl-btn" onclick="App.toggleFullscreen()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        Plein écran
+      </button>
+      <div class="stream-ctrl-divider"></div>
+      <button class="stream-ctrl-btn stream-ctrl-quit" onclick="App.stopStream()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Quitter le stream
+      </button>
+    </div>
   </div>
 </div>
 

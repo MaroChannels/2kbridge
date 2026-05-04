@@ -6,7 +6,7 @@
  */
 const fs   = require('fs');
 const path = require('path');
-const { ROOM_STATUS } = require('../../shared/constants');
+const { ROOM_STATUS } = require('../shared/constants');
 const { DATA_DIR } = require('./paths');
 
 const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, '2kbridge.json');

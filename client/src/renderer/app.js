@@ -132,6 +132,25 @@ const App = {
       showPage('page-login');
     }
 
+    // Update fullscreen button icon when fullscreen state changes
+    document.addEventListener('fullscreenchange', () => {
+      const btn = document.getElementById('btn-stream-fullscreen');
+      if (!btn) return;
+      if (document.fullscreenElement) {
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline>
+            <line x1="10" y1="14" x2="3" y2="21"></line><line x1="21" y1="3" x2="14" y2="10"></line>
+          </svg> Réduire`;
+      } else {
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg> Plein écran`;
+      }
+    });
+
     // Enter key support on login/register forms
     document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') App.login(); });
     document.getElementById('reg-confirm').addEventListener('keydown', e => { if (e.key === 'Enter') App.register(); });
@@ -645,6 +664,18 @@ const App = {
 
     console.log('[Host] Source sélectionnée pour capture :', source.name, '(' + source.id + ')');
 
+    // Find the game window as a separate audio source (per-process loopback)
+    const audioSource = sources.find(s => {
+      if (s.id.startsWith('screen:')) return false;
+      const name = s.name.toLowerCase();
+      return name.includes('nba') || name.includes('2k14') || name.includes('nba2k');
+    });
+    if (audioSource) {
+      console.log('[Host] Source audio jeu :', audioSource.name, '(' + audioSource.id + ')');
+    } else {
+      console.log('[Host] Fenêtre NBA 2K14 non détectée — fallback sur audio système');
+    }
+
     State.hostStreamer = new HostStreamer(State.socket);
 
     State.hostStreamer.onInput((input) => {
@@ -653,7 +684,7 @@ const App = {
     });
 
     try {
-      await State.hostStreamer.startCapture(source.id);
+      await State.hostStreamer.startCapture(source.id, audioSource?.id ?? null);
       document.getElementById('stream-status').style.display = 'flex';
       document.getElementById('stream-status-text').textContent = 'Stream actif – en attente des joueurs';
       toast('Stream démarré ! Les clients peuvent se connecter.', 'success');
@@ -715,6 +746,17 @@ const App = {
     document.getElementById('stream-connect-text').textContent = 'Connexion...';
   },
 
+  toggleFullscreen() {
+    const container = document.getElementById('stream-container');
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      container.requestFullscreen().catch(err => {
+        console.warn('[Stream] Fullscreen failed:', err.message);
+      });
+    }
+  },
+
   _startInputCapture() {
     if (!State.inputHandler) {
       State.inputHandler = new InputHandler();
@@ -724,7 +766,13 @@ const App = {
     });
     State.inputHandler.start();
 
-    State._escHandler = (e) => { if (e.key === 'Escape') App.stopStream(); };
+    // Escape: exit fullscreen if active, otherwise stop stream entirely
+    State._escHandler = (e) => {
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) return; // browser exits fullscreen natively
+        App.stopStream();
+      }
+    };
     window.addEventListener('keydown', State._escHandler);
   },
 

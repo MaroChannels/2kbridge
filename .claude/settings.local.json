@@ -12,7 +12,8 @@
       "Read(//tmp/**)",
       "Bash(npm run *)",
       "Bash(npx electron-builder *)",
-      "Bash(npx pkg *)"
+      "Bash(npx pkg *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\malob\\\\Desktop\\\\2KBridge\" -Recurse -Exclude \"node_modules\" | Where-Object { $_.FullName -notmatch \"node_modules\" } | Select-Object FullName)"
     ]
   }
 }
